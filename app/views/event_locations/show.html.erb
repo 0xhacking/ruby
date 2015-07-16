@@ -1,0 +1,9 @@
+<%= @event.name %>
+
+<% if @event.location %>
+<%= @event.location.name %>
+<%= link_to 'edit',edit_event_location_path(@event) %>
+<%= link_to 'destroy',event_location_path(@event), :method=>:delete %>
+<% else %>
+<%= link_to 'all_location',new_event_location_path(@event) %>
+<% end %>

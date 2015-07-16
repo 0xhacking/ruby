@@ -2,6 +2,18 @@ Rails.application.routes.draw do
   resources :people
   resources :events do
 	resources :attendees, :controller => 'event_attendees'
+	resource  :location, :controller => 'event_locations'
+	resource  :dashboard
+	collection  do
+		get :latest
+		post :bulk_delete
+		post :bulk_update
+	end
+	member do
+		get :dashboard
+		post :join
+		post :withdraw
+	end
   end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

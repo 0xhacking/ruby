@@ -1,7 +1,11 @@
 class EventsController < ApplicationController
 	#before_action :set_event, :only=>[ :show, :edit, :update, :description]
 	def index
-		@events = Event.page(params[:page]).per(5)
+		if params[:keyword]
+			@events = Event.where(["name like ?", "%#{params[:keyword]}%"]).page(params[:page])
+		else
+			@events = Event.page(params[:page]).per(5)
+		end
 		
 		respond_to do |format|
 			format.html 
@@ -61,6 +65,47 @@ class EventsController < ApplicationController
 		flash[:alert] = "failed"
 		redirect_to :action=>:index
 	end
+		
+	def latest
+		@events = Event.order("id desc").limit(3)
+	end
+
+	def bulk_delete
+		Event.destroy_all
+		redirect_to events_path
+	end
+
+	def bulk_update
+		ids = Array(params[:ids])
+		events = ids.map{ |i| Event.find_by_id(i)}.compact
+
+		if params[:commit] == "Publish"
+			events.each{ |e| e.update( :status=>"published" )}
+		elsif params[:commit] == "Delete"
+			events.each{|e| e.destory}
+		end
+		
+		redirect_to events_url
+	end
+
+	def dashboard
+		@event = Event.find(params[:id])
+	end
+	
+	def join
+		@event = Event.find(params[:id])
+		Membership.find_or_create_by(:event=>@event, :user=>current_user)
+		redirect_to :back
+	end
+
+	def withdraw
+		@event = Event.find(params[:id])
+		@membership = Membership.find_by(:event=>@event, :user=>current_user)
+		@membership.destroy
+		
+		redirect_to :back
+
+	end
 
 	private 
 
@@ -69,6 +114,6 @@ class EventsController < ApplicationController
 	end
 
 	def event_params
-		params.require(:event).permit(:name, :description)
+		params.require(:event).permit( :name, :description, :category_id, :location_attributes =>[:id, :name, :_destroy], :group_ids=>[] )
 	end
 end
