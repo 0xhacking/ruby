@@ -2,13 +2,34 @@
 <% @events.each do |event| %>
 <li>
 <%= event.name %>
+<%= link_to 'Dashboard', dashboard_event_path(event) %>
 <%= link_to 'Xml', event_path(event, :format=>:xml) %>
 <%= link_to 'JSON', event_path(event, :format=>:json) %>
 <%= link_to 'Show', event_path(event) %>
 <%= link_to 'Edit', edit_event_path(event) %>
+<%= link_to 'attendees', event_attendees_path(event) %>
 <%= link_to 'Delete',event_path(event), :method=>:delete, :data=>{:confirm=>"are u sure?"} %>
+<%= link_to 'Location', event_location_path(event) %>
 </li>
 <% end %>
 </ul>
 <%= paginate @events %>
 <%= link_to 'New Event', :controller=>'events', :action=>'new' %>
+<%= button_to 'Delete all', bulk_delete_events_path, :method=>:post %>
+
+<%= form_tag bulk_update_events_path do %>
+<ul>
+<% @events.each do |e| %>
+	<li> <%= check_box_tag "ids[]", e.id, false %>
+		<%= e.name %>
+	</li>
+<% end %>
+</ul>
+<%= submit_tag "delete" %>
+<%= submit_tag "publish" %>
+<% end %>
+
+<%= form_tag events_path, :method => :get do %>
+	<%= text_field_tag "keyword" %>
+	<%= submit_tag "search" %>
+<% end %>
